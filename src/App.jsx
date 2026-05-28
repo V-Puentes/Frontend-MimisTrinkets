@@ -1,35 +1,34 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
+import { CarritoProvider } from './context/CarritoProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import Login from './pages/Login';
 
-// Componentes temporales
-const LoginTemporal = () => <h1 style={{ padding: '40px' }}>Página de Login</h1>;
+// Componentes temporales restantes
 const AdminTemporal = () => <h1 style={{ padding: '40px' }}>Panel de Administración</h1>;
 const ClienteTemporal = () => <h1 style={{ padding: '40px' }}>Mis Pedidos</h1>;
 
 function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
-                <Navbar />
-                <Routes>
-                    {/* Rutas Públicas */}
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<LoginTemporal />} />
+            <CarritoProvider> {/* Nuevo Wrapper */}
+                <BrowserRouter>
+                    <Navbar />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/login" element={<Login />} />
 
-                    {/* Rutas Protegidas - Solo Usuarios Logueados */}
-                    <Route element={<ProtectedRoute />}>
-                        <Route path="/mis-pedidos" element={<ClienteTemporal />} />
-                    </Route>
-
-                    {/* Rutas Protegidas - Solo Administradores (rolId: 2) */}
-                    <Route element={<ProtectedRoute allowedRoleId={2} />}>
-                        <Route path="/admin" element={<AdminTemporal />} />
-                    </Route>
-                </Routes>
-            </BrowserRouter>
+                        <Route element={<ProtectedRoute />}>
+                            <Route path="/mis-pedidos" element={<ClienteTemporal />} />
+                        </Route>
+                        <Route element={<ProtectedRoute allowedRoleId={2} />}>
+                            <Route path="/admin" element={<AdminTemporal />} />
+                        </Route>
+                    </Routes>
+                </BrowserRouter>
+            </CarritoProvider>
         </AuthProvider>
     );
 }
