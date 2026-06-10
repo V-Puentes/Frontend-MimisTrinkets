@@ -93,6 +93,7 @@ const Checkout = () => {
         const direccionCompleta = `${calle.trim()}, ${comuna}, ${region}`;
 
         try {
+            // Flujo 1: Webpay Plus (Transbank)
             if (metodoPago === '1') {
                 const { data } = await api.post('/transbank/crear-transaccion', {
                     monto: totalFinal,
@@ -113,19 +114,40 @@ const Checkout = () => {
                 document.body.appendChild(form);
                 form.submit(); 
             } 
-            else if (metodoPago === '2' || metodoPago === '3') {
+            // Flujo 2: PayPal
+            else if (metodoPago === '2') {
+                // 1. Guardar el pedido internamente como "Pendiente"
                 await procesarCheckoutAPI({
                     total: totalFinal,
                     DIRECCION_ENVIO: direccionCompleta,
-                    METODO_PAGO_ID: parseInt(metodoPago, 10),
+                    METODO_PAGO_ID: 2,
+                    NOTAS: comentarios
+                });
+
+                // 2. Solicitar al backend la creación de la orden en PayPal
+                // PayPal requiere conversión de CLP a USD. Esto debe manejarse en el backend.
+                const { data } = await api.post('/paypal/crear-orden', {
+                    monto: totalFinal
+                });
+
+                // 3. Limpiar el carrito y redirigir al portal de PayPal
+                await cargarCarrito();
+                window.location.href = data.url; // URL de aprobación retornada por la API de PayPal
+            }
+            // Flujo 3: Transferencia Bancaria Manual
+            else if (metodoPago === '3') {
+                await procesarCheckoutAPI({
+                    total: totalFinal,
+                    DIRECCION_ENVIO: direccionCompleta,
+                    METODO_PAGO_ID: 3,
                     NOTAS: comentarios
                 });
                 await cargarCarrito();
                 navigate('/mis-pedidos');
             }
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.message || 'Error al conectar con el servidor.');
+            console.error('Error en el procesamiento:', err);
+            setError(err.response?.data?.message || 'Error al conectar con el servidor de pagos.');
             setLoading(false);
         }
     };
