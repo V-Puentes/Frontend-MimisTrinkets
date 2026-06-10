@@ -7,9 +7,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Checkout from './pages/Checkout';
 import MisPedidos from './pages/MisPedidos';
+import Admin from './pages/Admin'; // Importación del componente real
 
-// Componentes temporales restantes
-const AdminTemporal = () => <h1 style={{ padding: '40px' }}>Panel de Administración</h1>;
+// Se elimina AdminTemporal
 
 function App() {
     return (
@@ -21,9 +21,9 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
 
-                        {/* Rutas exclusivas de Administrador */}
+                        {/* Rutas exclusivas de Administrador (Rol 2) */}
                         <Route element={<ProtectedRoute allowedRoleId={2} />}>
-                            <Route path="/admin" element={<AdminTemporal />} />
+                            <Route path="/admin" element={<Admin />} />
                         </Route>
 
                         {/* Rutas protegidas genéricas (Clientes) */}

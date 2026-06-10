@@ -41,8 +41,8 @@ const MisPedidos = () => {
             {pedidos.length === 0 ? (
                 <p style={{ color: 'var(--color-secondary)' }}>Aún no has realizado ninguna compra.</p>
             ) : (
-                pedidos.map(pedido => (
-                    <div key={pedido.ID_PEDIDO} style={{
+                pedidos.map((pedido, index) => (
+                    <div key={pedido.ID_PEDIDO || index} style={{
                         backgroundColor: 'var(--color-white)', padding: '25px', borderRadius: '12px', 
                         border: '1px solid var(--color-border)', marginBottom: '20px',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
@@ -74,8 +74,8 @@ const MisPedidos = () => {
                         {/* Productos incluidos */}
                         <div style={{ backgroundColor: 'var(--color-bg)', padding: '15px', borderRadius: '8px' }}>
                             <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-secondary)', fontSize: '14px' }}>Artículos:</h4>
-                            {pedido.DetallePedidos?.map(item => (
-                                <div key={item.ID_DETALLE_PEDIDO} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', padding: '5px 0' }}>
+                            {pedido.DetallePedidos?.map((item, itemIndex) => (
+                                <div key={item.ID_DETALLE_PEDIDO || itemIndex} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', padding: '5px 0' }}>
                                     <span style={{ color: 'var(--color-text)' }}>
                                         <span style={{ fontWeight: 'bold', marginRight: '10px' }}>{item.CANTIDAD}x</span>
                                         {item.Producto?.NOMBRE_PROD || 'Producto no disponible'}
