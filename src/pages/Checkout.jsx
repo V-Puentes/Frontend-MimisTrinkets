@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../context/CarritoContext';
 import { useAuth } from '../context/AuthContext';
 import { procesarCheckoutAPI } from '../services/carritoService';
-import { chileData } from '../utils/chileData'; // Asegure la ruta correcta
+import { chileData } from '../utils/chileData';
 import api from '../services/api';
 
 const Checkout = () => {
@@ -14,38 +14,52 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Estados del formulario de despacho y facturación
     const [nombre, setNombre] = useState('');
     const [rut, setRut] = useState('');
     const [region, setRegion] = useState('');
     const [comuna, setComuna] = useState('');
     const [calle, setCalle] = useState('');
     const [comentarios, setComentarios] = useState('');
-    const [metodoPago, setMetodoPago] = useState('1'); // 1: Webpay, 3: Transferencia
+    const [metodoPago, setMetodoPago] = useState('1'); 
     const [comunasDisponibles, setComunasDisponibles] = useState([]);
 
-    // Carga de datos iniciales del usuario
+    // Sincronización estricta de los datos del usuario
+    // Sincronización estricta de los datos del usuario desde la Base de Datos
     useEffect(() => {
-        if (user) {
-            setNombre(user.nombre || user.NOMBRE || '');
-            setRut(user.rut || user.RUT || '');
+        const fetchPerfilUsuario = async () => {
+            if (!user) return;
             
-            const direccionGuardada = user.direccion || user.DIRECCION;
-            if (direccionGuardada && direccionGuardada.includes(',')) {
-                const partes = direccionGuardada.split(',').map(p => p.trim());
-                if (partes.length >= 3) {
-                    setCalle(partes[0]);
-                    const regionEncontrada = chileData.find(item => item.region === partes[2]);
-                    if (regionEncontrada) {
-                        setRegion(partes[2]);
-                        setComunasDisponibles(regionEncontrada.comunas);
-                        setComuna(partes[1]);
+            try {
+                // Petición al backend para traer los datos completos del usuario
+                // Ajusta la ruta si tu endpoint es distinto (ej: /usuarios/perfil)
+                const { data } = await api.get(`/usuarios/${user.id || user.ID_USUARIO}`);
+                
+                setNombre(data.NOMBRE || '');
+                setRut(data.RUT || '');
+                
+                const direccionGuardada = data.DIRECCION || data.direccion;
+                if (direccionGuardada && direccionGuardada.includes(',')) {
+                    const partes = direccionGuardada.split(',').map(p => p.trim());
+                    if (partes.length >= 3) {
+                        setCalle(partes[0]);
+                        const regionEncontrada = chileData.find(item => item.region === partes[2]);
+                        if (regionEncontrada) {
+                            setRegion(partes[2]);
+                            setComunasDisponibles(regionEncontrada.comunas);
+                            setComuna(partes[1]);
+                        }
                     }
                 }
+            } catch (err) {
+                console.error('Error al cargar el perfil del usuario para el checkout:', err);
+                // Fallback: intentar cargar lo que haya en el contexto si la API falla
+                setNombre(user.nombre || user.NOMBRE || '');
+                setRut(user.rut || user.RUT || '');
             }
-        }
-    }, [user]);
+        };
 
+        fetchPerfilUsuario();
+    }, [user]);
     const handleRegionChange = (e) => {
         const nuevaRegion = e.target.value;
         setRegion(nuevaRegion);
@@ -54,7 +68,6 @@ const Checkout = () => {
         setComuna('');
     };
 
-    // Cálculos Financieros Exactos
     const totalProductos = carrito.DetalleCarritos?.reduce((total, item) => {
         return total + (Number(item.Producto.PRECIO_PROD) * item.CANTIDAD);
     }, 0) || 0;
@@ -80,16 +93,13 @@ const Checkout = () => {
         const direccionCompleta = `${calle.trim()}, ${comuna}, ${region}`;
 
         try {
-            // Flujo 1: Webpay Plus (Transbank)
             if (metodoPago === '1') {
-                // 1. Se solicita al backend la creación de la transacción
                 const { data } = await api.post('/transbank/crear-transaccion', {
                     monto: totalFinal,
                     ordenCompra: `MT-${Date.now()}`,
                     sessionId: user.id
                 });
 
-                // 2. Transbank responde con una URL y un Token. Se debe enviar un formulario POST automático.
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = data.url;
@@ -102,10 +112,8 @@ const Checkout = () => {
                 form.appendChild(tokenInput);
                 document.body.appendChild(form);
                 form.submit(); 
-                // La ejecución del frontend termina aquí temporalmente hasta que Transbank retorne.
             } 
-            // Flujo 2: Pago Manual (Transferencia)
-            else {
+            else if (metodoPago === '2' || metodoPago === '3') {
                 await procesarCheckoutAPI({
                     total: totalFinal,
                     DIRECCION_ENVIO: direccionCompleta,
@@ -117,7 +125,7 @@ const Checkout = () => {
             }
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Error al conectar con el servidor de pagos.');
+            setError(err.response?.data?.message || 'Error al conectar con el servidor.');
             setLoading(false);
         }
     };
@@ -145,7 +153,7 @@ const Checkout = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px', alignItems: 'start' }}>
                 
-                {/* COLUMNA 1: Formulario de Identificación y Envío */}
+                {/* COLUMNA 1: Formulario */}
                 <form id="form-checkout" onSubmit={handleProcesarPago} style={{ backgroundColor: 'var(--color-white)', padding: '30px', borderRadius: '12px', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     
                     <div>
@@ -198,12 +206,35 @@ const Checkout = () => {
                         <h3 style={{ marginTop: '10px', color: 'var(--color-secondary)', borderBottom: '2px solid var(--color-border)', paddingBottom: '10px' }}>3. Medio de Pago</h3>
                         <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid var(--color-secondary)', boxSizing: 'border-box', backgroundColor: '#fff8f9', fontWeight: 'bold', color: 'var(--color-text)' }}>
                             <option value="1">💳 Tarjeta de Crédito / Débito (Webpay Plus)</option>
+                            <option value="2">🌐 PayPal</option>
                             <option value="3">🏦 Transferencia Bancaria Manual</option>
                         </select>
+
+                        {/* Renderizado condicional para Transferencia */}
+                        {metodoPago === '3' && (
+                            <div style={{ marginTop: '15px', padding: '15px', backgroundColor: 'var(--color-bg)', borderLeft: '4px solid var(--color-secondary)', borderRadius: '4px', fontSize: '14px', lineHeight: '1.6' }}>
+                                <strong>Instrucciones para Transferencia:</strong><br />
+                                Realice el depósito del monto exacto a la siguiente cuenta. Su pedido no será procesado hasta confirmar la recepción de los fondos.<br /><br />
+                                <strong>Banco:</strong> Banco Estado<br />
+                                <strong>Tipo de Cuenta:</strong> Cuenta Corriente<br />
+                                <strong>Número de Cuenta:</strong> 123456789<br />
+                                <strong>RUT:</strong> 76.543.210-K<br />
+                                <strong>Nombre:</strong> Mimis Trinkets SpA<br />
+                                <strong>Correo para comprobante:</strong> pagos@mimistrinkets.cl
+                            </div>
+                        )}
+
+                        {/* Renderizado condicional para PayPal */}
+                        {metodoPago === '2' && (
+                            <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#e1f5fe', borderLeft: '4px solid #0288d1', borderRadius: '4px', fontSize: '14px', color: '#01579b' }}>
+                                <strong>Pago Internacional:</strong><br />
+                                Al confirmar el pedido, el cargo se registrará y deberá procesar el pago mediante la plataforma de PayPal.
+                            </div>
+                        )}
                     </div>
                 </form>
 
-                {/* COLUMNA 2: Resumen Financiero y Botón de Pago */}
+                {/* COLUMNA 2: Resumen */}
                 <div style={{ backgroundColor: 'var(--color-white)', padding: '30px', borderRadius: '12px', border: '1px solid var(--color-border)', boxShadow: '0 4px 15px rgba(226, 132, 149, 0.1)', height: 'fit-content', position: 'sticky', top: '90px' }}>
                     <h3 style={{ marginTop: 0, borderBottom: '2px solid var(--color-border)', paddingBottom: '10px', color: 'var(--color-secondary)' }}>Detalle de la Orden</h3>
                     
@@ -221,7 +252,6 @@ const Checkout = () => {
                         ))}
                     </div>
                     
-                    {/* Cálculos Contables */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '2px solid var(--color-border)', paddingTop: '20px', fontSize: '15px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-secondary)' }}>
                             <span>Subtotal (Neto)</span>
@@ -252,7 +282,7 @@ const Checkout = () => {
                             transition: 'background-color 0.3s', opacity: loading ? 0.7 : 1, textTransform: 'uppercase'
                         }}
                     >
-                        {loading ? 'Redirigiendo...' : (metodoPago === '1' ? 'Ir a Webpay Plus' : 'Confirmar Pedido')}
+                        {loading ? 'Procesando...' : (metodoPago === '1' ? 'Ir a Webpay Plus' : 'Confirmar Pedido')}
                     </button>
                     
                     {metodoPago === '1' && (
@@ -261,7 +291,6 @@ const Checkout = () => {
                         </p>
                     )}
                 </div>
-
             </div>
         </div>
     );
