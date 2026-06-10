@@ -28,25 +28,24 @@ const Admin = () => {
     // 1. Carga inicial de datos
     useEffect(() => {
         const cargarDatos = async () => {
-            try {
-                // Se utiliza Promise.all para ejecutar las peticiones en paralelo
-                const [productosData, categoriasData, franquiciasData] = await Promise.all([
-                    obtenerProductos(),
-                    obtenerCategorias(),    // Requiere importación en la cabecera
-                    obtenerFranquicias()    // Requiere importación en la cabecera
-                ]);
-                
-                setProductos(productosData);
-                setCategorias(categoriasData);
-                setFranquicias(franquiciasData);
-            } catch (err) {
-                console.error(err);
-                setError('Error al cargar los datos del panel.');
-            } finally {
-                setLoading(false);
-            }
+        try {
+            const [productosData, categoriasData, franquiciasData] = await Promise.all([
+                obtenerProductos(),
+                obtenerCategorias(),
+                obtenerFranquicias()
+            ]);
+            setProductos(productosData);
+            setCategorias(categoriasData);
+            setFranquicias(franquiciasData);
+        } catch (err) {
+            console.error(err);
+            setError('Error al cargar los datos del panel.');
+        } finally {
+            setLoading(false);
+        }
         };
 
+    useEffect(() => {
         cargarDatos();
     }, []);
 
@@ -59,25 +58,31 @@ const Admin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.NOMBRE_PROD || !formData.PRECIO_PROD || !formData.STOCK || !formData.CATEGORIA_ID || !formData.FRANQUICIA_ID) {
+        if (!formData.NOMBRE_PROD.trim() || !formData.PRECIO_PROD || !formData.STOCK || !formData.CATEGORIA_ID || !formData.FRANQUICIA_ID) {
             alert('Por favor, complete todos los campos obligatorios.');
+            return;
+        }
+
+        if (Number(formData.PRECIO_PROD) < 0 || Number(formData.STOCK) < 0) {
+            alert('El precio y el stock no pueden ser valores negativos.');
             return;
         }
 
         try {
             if (modoEdicion) {
-                // await actualizarProducto(productoIdEditar, formData); // Descomentar cuando la función esté en productoService
-                alert('Producto actualizado correctamente');
+                await actualizarProducto(productoIdEditar, formData);
+                alert('Producto actualizado correctamente.');
             } else {
-                // await crearProducto(formData); // Descomentar cuando la función esté en productoService
-                alert('Producto creado correctamente');
+                await crearProducto(formData);
+                alert('Producto creado correctamente.');
             }
             
             setIsModalOpen(false);
-            // cargarProductos(); // Deberá extraer cargarProductos fuera del useEffect para poder llamarla aquí, o manejar el estado localmente.
+            setModoEdicion(false);
+            await cargarDatos(); // Refresca la tabla sincrónicamente con la BD
         } catch (err) {
             console.error(err);
-            alert('Error al guardar el producto.');
+            alert(typeof err === 'string' ? err : 'Error al guardar el producto. Verifique los campos.');
         }
     };
 

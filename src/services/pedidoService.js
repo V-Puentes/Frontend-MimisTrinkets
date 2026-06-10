@@ -8,3 +8,13 @@ export const obtenerMisPedidos = async () => {
         throw error.response?.data?.message || 'Error al obtener el historial de pedidos';
     }
 };
+
+export const obtenerTodosLosPedidos = async () => {
+    const response = await api.get('/pedidos');
+    return response.data;
+};
+
+export const actualizarEstadoPedido = async (id, estadoId) => {
+    const response = await api.put(`/pedidos/${id}`, { ESTADO_ID: estadoId });
+    return response.data;
+};

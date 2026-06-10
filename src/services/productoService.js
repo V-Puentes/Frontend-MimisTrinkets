@@ -29,3 +29,4 @@ export const obtenerFranquicias = async () => {
     const response = await api.get('/franquicias'); // Asegúrese de que este endpoint exista en su backend
     return response.data;
 };
+
