@@ -5,26 +5,31 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Checkout from './pages/Checkout';
+import MisPedidos from './pages/MisPedidos';
 
 // Componentes temporales restantes
 const AdminTemporal = () => <h1 style={{ padding: '40px' }}>Panel de Administración</h1>;
-const ClienteTemporal = () => <h1 style={{ padding: '40px' }}>Mis Pedidos</h1>;
 
 function App() {
     return (
         <AuthProvider>
-            <CarritoProvider> {/* Nuevo Wrapper */}
+            <CarritoProvider>
                 <BrowserRouter>
                     <Navbar />
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
 
-                        <Route element={<ProtectedRoute />}>
-                            <Route path="/mis-pedidos" element={<ClienteTemporal />} />
-                        </Route>
+                        {/* Rutas exclusivas de Administrador */}
                         <Route element={<ProtectedRoute allowedRoleId={2} />}>
                             <Route path="/admin" element={<AdminTemporal />} />
+                        </Route>
+
+                        {/* Rutas protegidas genéricas (Clientes) */}
+                        <Route element={<ProtectedRoute />}>
+                            <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/mis-pedidos" element={<MisPedidos />} />
                         </Route>
                     </Routes>
                 </BrowserRouter>
