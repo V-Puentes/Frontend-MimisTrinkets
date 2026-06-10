@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Importación de Link añadida
 import { useAuth } from '../context/AuthContext';
 import { loginUsuario } from '../services/authService';
 
@@ -20,7 +20,7 @@ const Login = () => {
         try {
             const data = await loginUsuario({ EMAIL: email, PASSWORD: password });
             login(data.token);
-            navigate('/'); // Redirección al catálogo tras el login exitoso
+            navigate('/'); 
         } catch (err) {
             setError(err);
         } finally {
@@ -122,6 +122,30 @@ const Login = () => {
                         {loading ? 'Verificando...' : 'Ingresar'}
                     </button>
                 </form>
+
+                {/* CONTENEDOR DE REDIRECCIÓN AL REGISTRO */}
+                <div style={{ 
+                    marginTop: '25px', 
+                    textAlign: 'center', 
+                    borderTop: '1px solid var(--color-border)', 
+                    paddingTop: '20px' 
+                }}>
+                    <span style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+                        ¿No tienes una cuenta aún?{' '}
+                    </span>
+                    <Link 
+                        to="/register" 
+                        style={{ 
+                            fontSize: '14px', 
+                            color: 'var(--color-text)', 
+                            fontWeight: 'bold', 
+                            textDecoration: 'none'
+                        }}
+                    >
+                        Regístrate aquí
+                    </Link>
+                </div>
+
             </div>
         </div>
     );

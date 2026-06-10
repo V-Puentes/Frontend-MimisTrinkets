@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importación agregada para controlar la redirección
 import { obtenerProductos, eliminarProducto, obtenerCategorias, obtenerFranquicias, crearProducto, actualizarProducto } from '../services/productoService';
 import { obtenerTodosLosPedidos, actualizarEstadoPedido } from '../services/pedidoService';
 import { obtenerDatosInventario, descargarInventarioExcel, obtenerDatosVentas, descargarVentasPDF } from '../services/reporteService';
 
 const Admin = () => {
+    const navigate = useNavigate(); // Inicialización del hook de navegación
     const [tabActiva, setTabActiva] = useState('productos'); 
     const [productos, setProductos] = useState([]);
     const [pedidos, setPedidos] = useState([]);
@@ -219,7 +221,7 @@ const Admin = () => {
         <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
             <h1 style={{ color: 'var(--color-text)', marginBottom: '20px' }}>Panel de Control Administrativo</h1>
             
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', borderBottom: '2px solid var(--color-border)', paddingBottom: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', borderBottom: '2px solid var(--color-border)', paddingBottom: '10px', flexWrap: 'wrap' }}>
                 <button onClick={() => setTabActiva('productos')} style={{ padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', border: 'none', backgroundColor: tabActiva === 'productos' ? 'var(--color-primary)' : 'transparent', color: tabActiva === 'productos' ? 'var(--color-white)' : 'var(--color-text)', borderRadius: '4px' }}>
                     Inventario de Productos
                 </button>
@@ -228,6 +230,23 @@ const Admin = () => {
                 </button>
                 <button onClick={() => setTabActiva('reportes')} style={{ padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', border: 'none', backgroundColor: tabActiva === 'reportes' ? 'var(--color-primary)' : 'transparent', color: tabActiva === 'reportes' ? 'var(--color-white)' : 'var(--color-text)', borderRadius: '4px' }}>
                     Módulo de Reportes
+                </button>
+                
+                {/* BOTÓN DE REDIRECCIÓN AL DASHBOARD DE GRÁFICOS Y CATEGORÍAS */}
+                <button 
+                    onClick={() => navigate('/admin/dashboard')} 
+                    style={{ 
+                        padding: '10px 20px', 
+                        cursor: 'pointer', 
+                        fontWeight: 'bold', 
+                        border: 'none', 
+                        backgroundColor: 'var(--color-text)', 
+                        color: 'var(--color-white)', 
+                        borderRadius: '4px',
+                        marginLeft: 'auto' // Desplaza el botón hacia el extremo derecho de la barra
+                    }}
+                >
+                    📊 Ver Gráficos y Categorías →
                 </button>
             </div>
 

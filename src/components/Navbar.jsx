@@ -7,8 +7,8 @@ const Navbar = () => {
     const { isAuthenticated, user, logout } = useAuth();
     const { toggleModal, carrito } = useCarrito();
 
-    // Conteo de ítems para el indicador visual
-    const totalItems = carrito.DetalleCarritos?.reduce((sum, item) => sum + item.CANTIDAD, 0) || 0;
+    // Conteo de ítems para el indicador visual con salvaguarda de objeto
+    const totalItems = carrito?.DetalleCarritos?.reduce((sum, item) => sum + item.CANTIDAD, 0) || 0;
 
     return (
         <>
@@ -44,7 +44,7 @@ const Navbar = () => {
                 {/* Bloque de Usuario y Carrito */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     
-                    {/* Botón del Carrito (Siempre disponible) */}
+                    {/* Botón del Carrito */}
                     <button onClick={toggleModal} style={{ 
                         background: 'none', border: 'none', cursor: 'pointer', 
                         fontWeight: 'bold', color: 'var(--color-secondary)', fontSize: '16px', display: 'flex', alignItems: 'center' 
@@ -52,12 +52,11 @@ const Navbar = () => {
                         Carrito <span style={{ 
                             backgroundColor: 'var(--color-primary)', color: 'var(--color-text)', 
                             borderRadius: '50%', padding: '2px 8px', marginLeft: '5px', fontSize: '12px' 
-                        }}>{totalItems}</span>
+                        }}> {totalItems} </span>
                     </button>
 
                     {isAuthenticated ? (
                         <>
-                            {/* Enlaces exclusivos para clientes autenticados */}
                             <Link to="/mis-pedidos" style={{ color: 'var(--color-text)', textDecoration: 'none', fontWeight: '500' }}>
                                 Mis Pedidos
                             </Link>
@@ -65,8 +64,8 @@ const Navbar = () => {
                                 Mi Cuenta
                             </Link>
 
-                            {/* Enlace exclusivo para el Administrador (Rol 2) */}
-                            {user?.rolId === 2 && (
+                            {/* CORRECCIÓN CRÍTICA DE PRIVILEGIOS: Acceso exclusivo para Administrador (ROL_ID === 1) */}
+                            {(user?.rolId === 1 || user?.ROL_ID === 1 || user?.rol === 'Administrador') && (
                                 <Link to="/admin" style={{ color: 'var(--color-secondary)', textDecoration: 'none', fontWeight: 'bold' }}>
                                     Panel Admin
                                 </Link>
@@ -90,7 +89,6 @@ const Navbar = () => {
                 </div>
             </nav>
 
-            {/* Renderizado del Modal fuera del flujo del Navbar */}
             <CarritoModal />
         </>
     );

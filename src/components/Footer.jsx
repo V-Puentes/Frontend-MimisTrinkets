@@ -21,12 +21,13 @@ const Footer = () => {
                         Tu tienda de accesorios y coleccionables favoritos. Calidad y exclusividad en cada detalle.
                     </p>
                 </div>
-                <div style={{ flex: '1', minWidth: '150px' }}>
+                                <div style={{ flex: '1', minWidth: '150px' }}>
                     <h4 style={{ marginTop: 0, borderBottom: '1px solid #555', paddingBottom: '5px' }}>Enlaces</h4>
                     <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', lineHeight: '2' }}>
                         <li><a href="/" style={{ color: '#ccc', textDecoration: 'none' }}>Inicio</a></li>
                         <li><a href="/contacto" style={{ color: '#ccc', textDecoration: 'none' }}>Contacto</a></li>
                         <li><a href="/mis-pedidos" style={{ color: '#ccc', textDecoration: 'none' }}>Mis Pedidos</a></li>
+                        <li><a href="/ayuda" style={{ color: '#ccc', textDecoration: 'none', fontWeight: 'bold' }}>Centro de Ayuda / FAQ</a></li>
                     </ul>
                 </div>
                 <div style={{ flex: '1', minWidth: '200px' }}>
