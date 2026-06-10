@@ -22,13 +22,30 @@ const Admin = () => {
     const [categorias, setCategorias] = useState([]);
     const [franquicias, setFranquicias] = useState([]);
 
-    // Estados del Módulo de Reportes
+    // Estados del Módulo de Reportes (Inicializados vacíos para llenado dinámico en useEffect)
     const [fechaInicio, setFechaInicio] = useState('');
     const [fechaFin, setFechaFin] = useState('');
     const [limiteStock, setLimiteStock] = useState('10');
     const [reporteVentas, setReporteVentas] = useState([]);
     const [reporteStock, setReporteStock] = useState([]);
     const [loadingReporte, setLoadingReporte] = useState(false);
+
+    // Inicialización automatizada de fechas por defecto (Rango de 1 mes)
+    useEffect(() => {
+        const hoy = new Date();
+        const haceUnMes = new Date();
+        haceUnMes.setMonth(hoy.getMonth() - 1);
+
+        const formatearFechaISO = (date) => {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+
+        setFechaFin(formatearFechaISO(hoy));
+        setFechaInicio(formatearFechaISO(haceUnMes));
+    }, []);
 
     const cargarDatosPanel = async () => {
         setLoading(true);
