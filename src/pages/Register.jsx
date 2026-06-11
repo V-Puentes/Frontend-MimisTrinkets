@@ -28,10 +28,10 @@ const Register = () => {
         setError(null);
 
         try {
-            // Se envía el ROL_ID por defecto como 2 (Cliente) para evitar elevación de privilegios
+
             await api.post('/usuarios/registro-publico', {
                 ...formData,
-                ROL_ID: 2 
+                ROL_ID: 1
             });
 
             alert('Cuenta creada exitosamente. Ya puedes iniciar sesión.');

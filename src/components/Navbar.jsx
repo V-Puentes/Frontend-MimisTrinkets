@@ -65,13 +65,13 @@ const Navbar = () => {
                             </Link>
 
                             {/* CORRECCIÓN CRÍTICA DE PRIVILEGIOS: Acceso exclusivo para Administrador (ROL_ID === 1) */}
-                            {(user?.rolId === 1 || user?.ROL_ID === 1 || user?.rol === 'Administrador') && (
+                            {isAuthenticated && (user?.ROL_ID === 2 || user?.rolId === 2) && (
                                 <Link to="/admin" style={{ color: 'var(--color-secondary)', textDecoration: 'none', fontWeight: 'bold' }}>
                                     Panel Admin
                                 </Link>
                             )}
 
-                            <button onClick={logout} style={{ 
+                            <button onClick={logout} style={{
                                 padding: '8px 15px', backgroundColor: 'var(--color-text)', color: 'var(--color-white)', 
                                 border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold'
                             }}>

@@ -15,8 +15,6 @@ import Ayuda from './pages/Ayuda';
 import AdminDashboard from './pages/AdminDashboard';
 import Register from './pages/Register';
 
-// Se elimina AdminTemporal
-
 function App() {
     return (
         <AuthProvider>
